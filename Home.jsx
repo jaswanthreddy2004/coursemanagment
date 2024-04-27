@@ -1,22 +1,19 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
-import { toast, Toaster } from "react-hot-toast";
-import axios from "axios";
 import Notice from "../../components/Notice";
-import Student from "./Student";
-import Faculty from "./Faculty";
-import Subjects from "./Subject";
-import { baseApiURL } from "../../baseUrl";
-import Admin from "./Admin";
 import Profile from "./Profile";
-import Branch from "./Branch";
+import Timetable from "./Timetable";
+import { Toaster } from "react-hot-toast";
+import Material from "./Material";
+import Marks from "./Marks";
+import Student from "./Student";
 
 const Home = () => {
   const router = useLocation();
   const navigate = useNavigate();
+  const [selectedMenu, setSelectedMenu] = useState("My Profile");
   const [load, setLoad] = useState(false);
-  const [selectedMenu, setSelectedMenu] = useState("Profile");
 
   useEffect(() => {
     if (router.state === null) {
@@ -25,101 +22,73 @@ const Home = () => {
     setLoad(true);
   }, [navigate, router.state]);
 
-  const getStudentCount = useCallback(() => {
-    const headers = {
-      "Content-Type": "application/json",
-    };
-    axios
-      .get(`${baseApiURL()}/student/details/count`, {
-        headers: headers,
-      })
-      .then((response) => {
-        if (response.data.success) {
-          // Do something with the response if needed
-        } else {
-          toast.error(response.data.message);
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }, []);
-
-  const getFacultyCount = useCallback(() => {
-    const headers = {
-      "Content-Type": "application/json",
-    };
-    axios
-      .get(`${baseApiURL()}/faculty/details/count`, {
-        headers: headers,
-      })
-      .then((response) => {
-        if (response.data.success) {
-          // Do something with the response if needed
-        } else {
-          toast.error(response.data.message);
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }, []);
-
-  useEffect(() => {
-    getStudentCount();
-  }, [getStudentCount]);
-
-  useEffect(() => {
-    getFacultyCount();
-  }, [getFacultyCount]);
-
   return (
-    <>
+    <section>
       {load && (
         <>
           <Navbar />
-          <div className="container mx-auto mt-8">
-            <ul className="flex justify-center space-x-4">
-              {menuItems.map((item) => (
-                <li
-                  key={item.id}
-                  className={`text-center py-2 px-4 rounded-lg cursor-pointer
-                  ${
-                    selectedMenu === item.name
-                      ? "bg-blue-500 text-white"
-                      : "text-blue-500 hover:bg-blue-100"
-                  }`}
-                  onClick={() => setSelectedMenu(item.name)}
-                >
-                  {item.label}
-                </li>
-              ))}
+          <div className="flex justify-center my-8">
+            <ul className="flex justify-center items-center gap-4">
+              <MenuItem
+                label="My Profile"
+                selected={selectedMenu === "My Profile"}
+                onClick={() => setSelectedMenu("My Profile")}
+              />
+              <MenuItem
+                label="Student Info"
+                selected={selectedMenu === "Student Info"}
+                onClick={() => setSelectedMenu("Student Info")}
+              />
+              <MenuItem
+                label="Upload Marks"
+                selected={selectedMenu === "Upload Marks"}
+                onClick={() => setSelectedMenu("Upload Marks")}
+              />
+              <MenuItem
+                label="Timetable"
+                selected={selectedMenu === "Timetable"}
+                onClick={() => setSelectedMenu("Timetable")}
+              />
+              <MenuItem
+                label="Notice"
+                selected={selectedMenu === "Notice"}
+                onClick={() => setSelectedMenu("Notice")}
+              />
+              <MenuItem
+                label="Material"
+                selected={selectedMenu === "Material"}
+                onClick={() => setSelectedMenu("Material")}
+              />
             </ul>
           </div>
-          <div className="container mx-auto mt-8">
-            {selectedMenu === "Branch" && <Branch />}
+          <div className="mx-auto max-w-screen-lg">
+            {selectedMenu === "Timetable" && <Timetable />}
+            {selectedMenu === "Upload Marks" && <Marks />}
+            {selectedMenu === "Material" && <Material />}
             {selectedMenu === "Notice" && <Notice />}
-            {selectedMenu === "Student" && <Student />}
-            {selectedMenu === "Faculty" && <Faculty />}
-            {selectedMenu === "Subjects" && <Subjects />}
-            {selectedMenu === "Admin" && <Admin />}
-            {selectedMenu === "Profile" && <Profile />}
+            {selectedMenu === "My Profile" && <Profile />}
+            {selectedMenu === "Student Info" && <Student />}
           </div>
         </>
       )}
       <Toaster position="bottom-center" />
-    </>
+    </section>
   );
 };
 
-const menuItems = [
-  { id: 1, name: "Profile", label: "Profile" },
-  { id: 2, name: "Student", label: "Student" },
-  { id: 3, name: "Faculty", label: "Faculty" },
-  { id: 4, name: "Branch", label: "Branch" },
-  { id: 5, name: "Notice", label: "Notice" },
-  { id: 6, name: "Subjects", label: "Subjects" },
-  { id: 7, name: "Admin", label: "Admins" },
-];
+const MenuItem = ({ label, selected, onClick }) => {
+  return (
+    <li
+      className={`px-4 py-2 cursor-pointer transition-colors ${
+        selected
+          ? "bg-blue-500 text-white hover:bg-blue-600"
+          : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+      } rounded-md`}
+      onClick={onClick}
+    >
+      {label}
+    </li>
+  );
+};
 
 export default Home;
