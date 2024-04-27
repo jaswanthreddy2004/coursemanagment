@@ -1,10 +1,10 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { baseApiURL } from "../../baseUrl";
-import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
+import { useLocation } from "react-router-dom";
 import { setUserData } from "../../redux/actions";
+import { baseApiURL } from "../../baseUrl";
+import toast from "react-hot-toast";
 const Profile = () => {
   const [showPass, setShowPass] = useState(false);
   const router = useLocation();
@@ -21,18 +21,20 @@ const Profile = () => {
     axios
       .post(
         `${baseApiURL()}/${router.state.type}/details/getDetails`,
-        { employeeId: router.state.loginid },
+        { enrollmentNo: router.state.loginid },
         {
           headers: headers,
         }
       )
       .then((response) => {
         if (response.data.success) {
-          setData(response.data.user);
+          setData(response.data.user[0]);
           dispatch(
             setUserData({
               fullname: `${response.data.user[0].firstName} ${response.data.user[0].middleName} ${response.data.user[0].lastName}`,
-              employeeId: response.data.user[0].employeeId,
+              semester: response.data.user[0].semester,
+              enrollmentNo: response.data.user[0].enrollmentNo,
+              branch: response.data.user[0].branch,
             })
           );
         } else {
@@ -42,7 +44,7 @@ const Profile = () => {
       .catch((error) => {
         console.error(error);
       });
-  }, [router.state.loginid, router.state.type]);
+  }, [dispatch, router.state.loginid, router.state.type]);
 
   const checkPasswordHandler = (e) => {
     e.preventDefault();
@@ -51,7 +53,7 @@ const Profile = () => {
     };
     axios
       .post(
-        `${baseApiURL()}/faculty/auth/login`,
+        `${baseApiURL()}/student/auth/login`,
         { loginid: router.state.loginid, password: password.current },
         {
           headers: headers,
@@ -76,7 +78,7 @@ const Profile = () => {
     };
     axios
       .post(
-        `${baseApiURL()}/faculty/auth/update/${id}`,
+        `${baseApiURL()}/student/auth/update/${id}`,
         { loginid: router.state.loginid, password: password.new },
         {
           headers: headers,
@@ -102,22 +104,21 @@ const Profile = () => {
         <>
           <div>
             <p className="text-2xl font-semibold">
-              Hello {data[0].firstName} {data[0].middleName} {data[0].lastName}{" "}
-              👋
+              Hello {data.firstName} {data.middleName} {data.lastName}👋
             </p>
             <div className="mt-3">
               <p className="text-lg font-normal mb-2">
-                Employee Id: {data[0].employeeId}
+                Enrollment No: {data.enrollmentNo}
               </p>
-              <p className="text-lg font-normal mb-2">Post: {data[0].post}</p>
+              <p className="text-lg font-normal mb-2">Branch: {data.branch}</p>
               <p className="text-lg font-normal mb-2">
-                Email Id: {data[0].email}
-              </p>
-              <p className="text-lg font-normal mb-2">
-                Phone Number: {data[0].phoneNumber}
+                Semester: {data.semester}
               </p>
               <p className="text-lg font-normal mb-2">
-                Department: {data[0].department}
+                Phone Number: +91 {data.phoneNumber}
+              </p>
+              <p className="text-lg font-normal mb-2">
+                Email Address: {data.email}
               </p>
             </div>
             <button
@@ -161,9 +162,10 @@ const Profile = () => {
               </form>
             )}
           </div>
+
           <img
-            src={data[0].profile}
-            alt="faculty profile"
+            src={data.profile}
+            alt="student profile"
             className="h-[200px] w-[200px] object-cover rounded-lg shadow-md"
           />
         </>
